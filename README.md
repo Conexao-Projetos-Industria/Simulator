@@ -1,7 +1,7 @@
 # Simulator
 by:
 @GiulianoWF
-(TODO) Name here!
+(TODO) Put your name here too!
 
 Commands to build on linux:
 (TODO)sudo apt install ...
