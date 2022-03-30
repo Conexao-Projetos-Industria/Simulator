@@ -19,7 +19,7 @@
 #include <string>
 #include <thread>
 
-#include "mjxmacro.h"
+#include <mjxmacro.h>
 #include "uitools.h"
 
 #include "array_safety.h"
@@ -34,15 +34,17 @@ const int maxgeom = 5000;           // preallocated geom array in mjvScene
 const double syncmisalign = 0.1;    // maximum time mis-alignment before re-sync
 const double refreshfactor = 0.7;   // fraction of refresh available for simulation
 const int max_slow_down = 128;      // maximum slow-down quotient
+const double zoom_increment = 0.02; // ratio of single click-wheel zoom increment to vertical extent
 
 // model and data
 mjModel* m = NULL;
 mjData* d = NULL;
 
 
-// filename strings
+// strings
 char filename[kBufSize] = "";
 char previous_filename[kBufSize] = "";
+char loadError[kBufSize] = "";
 
 
 // control noise variables
@@ -195,44 +197,50 @@ const mjuiDef defWatch[] = {
 
 // help strings
 const char help_content[] =
-  "Alt mouse button\n"
-  "UI right hold\n"
-  "UI title double-click\n"
   "Space\n"
-  "Esc\n"
+  "+  -\n"
   "Right arrow\n"
-  "Left arrow\n"
-  "Down arrow\n"
-  "Up arrow\n"
-  "Page Up\n"
+  "[  ]\n"
+  "Esc\n"
   "Double-click\n"
+  "Page Up\n"
   "Right double-click\n"
   "Ctrl Right double-click\n"
   "Scroll, middle drag\n"
   "Left drag\n"
   "[Shift] right drag\n"
   "Ctrl [Shift] drag\n"
-  "Ctrl [Shift] right drag";
+  "Ctrl [Shift] right drag\n"
+  "F1\n"
+  "F2\n"
+  "F3\n"
+  "F4\n"
+  "F5\n"
+  "UI right hold\n"
+  "UI title double-click";
 
 const char help_title[] =
-  "Swap left-right\n"
-  "Show UI shortcuts\n"
-  "Expand/collapse all  \n"
-  "Pause\n"
+  "Play / Pause\n"
+  "Speed up / down\n"
+  "Step\n"
+  "Cycle cameras\n"
   "Free camera\n"
-  "Step forward\n"
-  "Step back\n"
-  "Step forward 100\n"
-  "Step back 100\n"
-  "Select parent\n"
   "Select\n"
+  "Select parent\n"
   "Center\n"
-  "Track camera\n"
+  "Tracking camera\n"
   "Zoom\n"
   "View rotate\n"
   "View translate\n"
   "Object rotate\n"
-  "Object translate";
+  "Object translate\n"
+  "Help\n"
+  "Info\n"
+  "Profiler\n"
+  "Sensors\n"
+  "Full screen\n"
+  "Show UI shortcuts\n"
+  "Expand/collapse all";
 
 
 // info strings
@@ -758,7 +766,7 @@ void makerendering(int oldstate) {
     },
     {
       mjITEM_BUTTON,
-      "Print camera",
+      "Copy camera",
       2,
       NULL,
       ""
@@ -897,7 +905,7 @@ void makejoint(int oldstate) {
 
   // add scalar joints, exit if UI limit reached
   int itemcnt = 0;
-  for (i=0; i < m->njnt && itemcnt<mjMAXUIITEM; i++)
+  for (i=0; i<m->njnt && itemcnt<mjMAXUIITEM; i++)
     if ((m->jnt_type[i]==mjJNT_HINGE || m->jnt_type[i]==mjJNT_SLIDE)) {
       // skip if joint group is disabled
       if (!vopt.jointgroup[mjMAX(0, mjMIN(mjNGROUP-1, m->jnt_group[i]))]) {
@@ -1067,20 +1075,29 @@ void cleartimers(void) {
 
 
 
-// print current camera as MJCF specification
-void printcamera(mjvGLCamera* camera) {
+// copy current camera to clipboard as MJCF specification
+void copycamera(mjvGLCamera* camera) {
+  char clipboard[500];
   mjtNum cam_right[3];
   mjtNum cam_forward[3];
   mjtNum cam_up[3];
+
+  // get camera spec from the GLCamera
   mju_f2n(cam_forward, camera[0].forward, 3);
   mju_f2n(cam_up, camera[0].up, 3);
   mju_cross(cam_right, cam_forward, cam_up);
-  std::printf("<camera pos=\"%.3f %.3f %.3f\" xyaxes=\"%.3f %.3f %.3f %.3f %.3f %.3f\"/>\n",
+
+  // make MJCF camera spec
+  mju::sprintf_arr(clipboard,
+               "<camera pos=\"%.3f %.3f %.3f\" xyaxes=\"%.3f %.3f %.3f %.3f %.3f %.3f\"/>\n",
               (camera[0].pos[0] + camera[1].pos[0]) / 2,
               (camera[0].pos[1] + camera[1].pos[1]) / 2,
               (camera[0].pos[2] + camera[1].pos[2]) / 2,
               cam_right[0], cam_right[1], cam_right[2],
               camera[0].up[0], camera[0].up[1], camera[0].up[2]);
+
+  // copy spec into clipboard
+  glfwSetClipboardString(window, clipboard);
 }
 
 
@@ -1134,28 +1151,34 @@ void loadmodel(void) {
   }
 
   // load and compile
-  char error[500] = "";
+  loadError[0] = '\0';
   mjModel* mnew = 0;
   if (mju::strlen_arr(filename)>4 &&
       !std::strncmp(filename+mju::strlen_arr(filename)-4, ".mjb",
                     mju::sizeof_arr(filename)-mju::strlen_arr(filename)+4)) {
     mnew = mj_loadModel(filename, NULL);
     if (!mnew) {
-      mju::strcpy_arr(error, "could not load binary model");
+      mju::strcpy_arr(loadError, "could not load binary model");
     }
   } else {
-    mnew = mj_loadXML(filename, NULL, error, 500);
+    mnew = mj_loadXML(filename, NULL, loadError, kBufSize);
+    // remove trailing newline character from loadError
+    if (loadError[0]) {
+      int error_length = mju::strlen_arr(loadError);
+      if (loadError[error_length-1] == '\n') {
+        loadError[error_length-1] = '\0';
+      }
+    }
   }
   if (!mnew) {
-    std::printf("%s\n", error);
+    std::printf("%s\n", loadError);
     return;
   }
 
   // compiler warning: print and pause
-  if (error[0]) {
+  if (loadError[0]) {
     // mj_forward() below will print the warning message
-    std::printf("Model compiled, but simulation warning (paused):\n  %s\n\n",
-                error);
+    std::printf("Model compiled, but simulation warning (paused):\n  %s\n", loadError);
     settings.run = 0;
   }
 
@@ -1443,9 +1466,9 @@ void uiEvent(mjuiState* state) {
         cam.type = mjCAMERA_FIXED;
         cam.fixedcamid = settings.camera - 2;
       }
-      // print floating camera as MJCF element
+      // copy camera spec to clipboard (as MJCF element)
       if (it->itemid == 3) {
-        printcamera(scn.camera);
+        copycamera(scn.camera);
       }
     }
 
@@ -1517,44 +1540,6 @@ void uiEvent(mjuiState* state) {
       }
       break;
 
-    case mjKEY_LEFT:            // step back
-      if (m && !settings.run) {
-        m->opt.timestep = -m->opt.timestep;
-        cleartimers();
-        mj_step(m, d);
-        m->opt.timestep = -m->opt.timestep;
-        profilerupdate();
-        sensorupdate();
-        updatesettings();
-      }
-      break;
-
-    case mjKEY_DOWN:            // step forward 100
-      if (m && !settings.run) {
-        cleartimers();
-        for (i=0; i<100; i++) {
-          mj_step(m, d);
-        }
-        profilerupdate();
-        sensorupdate();
-        updatesettings();
-      }
-      break;
-
-    case mjKEY_UP:              // step back 100
-      if (m && !settings.run) {
-        m->opt.timestep = -m->opt.timestep;
-        cleartimers();
-        for (i=0; i<100; i++) {
-          mj_step(m, d);
-        }
-        m->opt.timestep = -m->opt.timestep;
-        profilerupdate();
-        sensorupdate();
-        updatesettings();
-      }
-      break;
-
     case mjKEY_PAGE_UP:         // select parent body
       if (m && pert.select>0) {
         pert.select = m->body_parentid[pert.select];
@@ -1568,20 +1553,48 @@ void uiEvent(mjuiState* state) {
 
       break;
 
+    case ']':                   // cycle up fixed cameras
+      if (m->ncam) {
+        cam.type = mjCAMERA_FIXED;
+        // settings.camera = {0 or 1} are reserved for the free and tracking cameras
+        if (settings.camera < 2 || settings.camera == 2 + m->ncam-1) {
+          settings.camera = 2;
+        } else {
+          settings.camera += 1;
+        }
+        cam.fixedcamid = settings.camera - 2;
+        mjui_update(SECT_RENDERING, -1, &ui0, &uistate, &con);
+      }
+      break;
+
+    case '[':                   // cycle down fixed cameras
+      if (m->ncam) {
+        cam.type = mjCAMERA_FIXED;
+        // settings.camera = {0 or 1} are reserved for the free and tracking cameras
+        if (settings.camera <= 2) {
+          settings.camera = 2 + m->ncam-1;
+        } else {
+          settings.camera -= 1;
+        }
+        cam.fixedcamid = settings.camera - 2;
+        mjui_update(SECT_RENDERING, -1, &ui0, &uistate, &con);
+      }
+      break;
+
     case mjKEY_ESCAPE:          // free camera
       cam.type = mjCAMERA_FREE;
       settings.camera = 0;
       mjui_update(SECT_RENDERING, -1, &ui0, &uistate, &con);
       break;
 
-    case '-':          // slow down
+    case '-':                   // slow down
       if (settings.slow_down < max_slow_down && !state->shift) {
         settings.slow_down *= 2;
         settings.speed_changed = true;
       }
       break;
 
-    case '=':          // speed up
+    case '=':                   // speed up
       if (settings.slow_down > 1 && !state->shift) {
         settings.slow_down /= 2;
         settings.speed_changed = true;
@@ -1594,8 +1607,8 @@ void uiEvent(mjuiState* state) {
 
   // 3D scroll
   if (state->type==mjEVENT_SCROLL && state->mouserect==3 && m) {
-    // emulate vertical mouse motion = 5% of window height
-    mjv_moveCamera(m, mjMOUSE_ZOOM, 0, -0.05*state->sy, &scn, &cam);
+    // emulate vertical mouse motion = 2% of window height
+    mjv_moveCamera(m, mjMOUSE_ZOOM, 0, -zoom_increment*state->sy, &scn, &cam);
 
     return;
   }
@@ -1797,12 +1810,19 @@ void render(GLFWwindow* window) {
     mjr_rectangle(rect, 0.2f, 0.3f, 0.4f, 1);
 
     // label
-    if (settings.loadrequest)
-      mjr_overlay(mjFONT_BIG, mjGRID_TOPRIGHT, smallrect,
-                  "loading", NULL, &con);
-    else
-      mjr_overlay(mjFONT_NORMAL, mjGRID_TOPLEFT, rect,
-                  "Drag-and-drop model file here", 0, &con);
+    if (settings.loadrequest) {
+      mjr_overlay(mjFONT_BIG, mjGRID_TOPRIGHT, smallrect, "loading", NULL, &con);
+    } else {
+      char intro_message[kBufSize];
+      mju::sprintf_arr(intro_message,
+                       "MuJoCo version %s\nDrag-and-drop model file here", mj_versionString());
+      mjr_overlay(mjFONT_NORMAL, mjGRID_TOPLEFT, rect, intro_message, 0, &con);
+    }
+
+    // show last loading error
+    if (loadError[0]) {
+      mjr_overlay(mjFONT_NORMAL, mjGRID_BOTTOMLEFT, rect, loadError, 0, &con);
+    }
 
     // render uis
     if (settings.ui0) {
@@ -1821,10 +1841,16 @@ void render(GLFWwindow* window) {
   // render scene
   mjr_render(rect, &scn, &con);
 
+  // show last loading error
+  if (loadError[0]) {
+    mjr_overlay(mjFONT_NORMAL, mjGRID_BOTTOMLEFT, rect, loadError, 0, &con);
+  }
+
   // show pause/loading label
-  if (!settings.run || settings.loadrequest)
+  if (!settings.run || settings.loadrequest) {
     mjr_overlay(mjFONT_BIG, mjGRID_TOPRIGHT, smallrect,
                 settings.loadrequest ? "loading" : "pause", NULL, &con);
+  }
 
   // show realtime label
   if (settings.run && settings.slow_down != 1) {
