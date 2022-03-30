@@ -26,7 +26,6 @@ double lasty = 0;
 
 // }
 
-extern mjfGeneric mjcb_control;
 extern void custom_init(const mjModel* m, mjData* d);
 extern void mycontroller(const mjModel* m, mjData* d);
 // void mycontroller(const mjModel* m, mjData* d)	
