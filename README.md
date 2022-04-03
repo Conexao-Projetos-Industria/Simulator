@@ -19,13 +19,23 @@ cmake --build .
 cd ..
 ```
 
-##Commands to build on windows:
+## Commands to build on windows:
+Dependencies are downloaded and built automatically.
+Only Visual Studio generator is supported at the moment.
 
-(TODO)
+```
+mkdir build
+cd build
+cmake .. -G "Visual Studio 17 2022"
+cmake --build .
+```
 
-##Commands to run on linux:
+## Commands to run on linux:
 
 ./bin/sim_base model/pendulum/pendulum.xml
 
 ## Commands to run on windows:
-(TODO)
+
+```
+bin\Debug\sim_base.exe model\pendulum\pendulum.xml
+```
