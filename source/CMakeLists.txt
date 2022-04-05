@@ -1,0 +1,5 @@
+add_subdirectory(simulation)
+add_subdirectory(sim_controller)
+add_subdirectory(digital_twin_adapter)
+add_subdirectory(serial_adapter)
+add_subdirectory(activity_manager)

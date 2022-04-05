@@ -12,11 +12,9 @@ elseif(UNIX)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib/our/linux)
 endif ()
 
+include(ExternalProject)
+
 if (WIN32)
-    message(STATUS "INCLUDING EXTERNAL GLFW3")
-
-    include(ExternalProject)
-
     ExternalProject_Add(
         external_glfw3
         URL "https://github.com/glfw/glfw/archive/3.1.tar.gz"
@@ -42,46 +40,52 @@ if (WIN32)
 
     ExternalProject_Add(
         external_mujoco
-        PREFIX ${PROJECT_SOURCE_DIR}/external/downloaded/mujoco
+        PREFIX ${PROJECT_SOURCE_DIR}/external/mujoco
         URL "https://github.com/deepmind/mujoco/releases/download/2.1.3/mujoco-2.1.3-windows-x86_64.zip"
         #URL_HASH SHA1=fe17a0610a239311a726ecabcd2dbd669fb24ca8
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/external/downloaded/mujoco/src/external_mujoco/bin/mujoco.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/mujoco.dll 
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/external/mujoco/src/external_mujoco/bin/mujoco.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/mujoco.dll 
     )
     include_directories(${PROJECT_SOURCE_DIR}/external/mujoco/include)
     add_library(mujocoInstallDll STATIC IMPORTED)
     add_dependencies(mujocoInstallDll external_mujoco)
 
     list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+elseif (UNIX)
+    ExternalProject_Add(
+        external_mujoco
+        PREFIX ${CMAKE_CURRENT_BINARY_DIR}/mujoco
+        URL "https://github.com/deepmind/mujoco/releases/download/2.1.4/mujoco-2.1.4-linux-x86_64.tar.gz"
+        #URL_HASH SHA1=fe17a0610a239311a726ecabcd2dbd669fb24ca8
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""
+    )
+
+    file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/external/mujoco/include/)
+
+    add_custom_command(
+        TARGET external_mujoco POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/mujoco/src/external_mujoco/include/* ${PROJECT_SOURCE_DIR}/external/mujoco/include/
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/external/mujoco/lib/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/mujoco/src/external_mujoco/lib/* ${PROJECT_SOURCE_DIR}/external/mujoco/lib/
+    )
+
+    # include_directories(${PROJECT_SOURCE_DIR}/external/mujoco/include)
+    add_library(mujocoExternalLib SHARED IMPORTED)
+    add_dependencies(mujocoExternalLib external_mujoco)
+    target_include_directories(mujocoExternalLib INTERFACE ${PROJECT_SOURCE_DIR}/external/mujoco/include)
+    set_target_properties(mujocoExternalLib PROPERTIES IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/external/mujoco/lib/libmujoco.so")
+
 endif ()
 
 find_package(Threads)
-if (WIN32)
-    set(OpenGL_GL_PREFERENCE GLVND)
-    find_package(OpenGL REQUIRED)
-elseif (UNIX)
+set(OpenGL_GL_PREFERENCE GLVND)
+find_package(OpenGL REQUIRED)
+if (UNIX)
     find_package(glfw3 REQUIRED)
-    set(OpenGL_GL_PREFERENCE GLVND)
-    find_package(OpenGL REQUIRED)
     find_package(GLEW REQUIRED)
 endif ()
 
-add_library(ui STATIC sample/uitools.c sample/uitools.h)
-
-include_directories(include/)
-if (WIN32)
-    target_link_libraries(ui glfw3 glew ${OPENGL_LIBRARY})
-    link_directories(${CMAKE_SOURCE_DIR}/lib/windows)
-elseif (UNIX)
-    target_link_libraries(ui glfw)
-    link_directories(${CMAKE_SOURCE_DIR}/lib/linux)
-endif ()
-
-add_library(controller STATIC app/control.cpp)
-add_executable(sim_base app/sim_base.cpp)
-if (WIN32)
-    target_link_libraries(sim_base controller ui mujoco ${CMAKE_THREAD_LIBS_INIT} glfw3)
-elseif (UNIX)
-    target_link_libraries(sim_base controller ui mujoco ${CMAKE_THREAD_LIBS_INIT} glfw ${GLEW_LIBRARIES} ${OPENGL_gl_LIBRARY})
-endif ()
+add_subdirectory(source)
