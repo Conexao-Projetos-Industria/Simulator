@@ -1,7 +1,4 @@
 # Simulator
-by:
-@GiulianoWF
-(TODO) Put your name here too!
 
 ## Commands to build on linux:
 

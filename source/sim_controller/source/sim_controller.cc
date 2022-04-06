@@ -30,13 +30,12 @@ void SimController::Init(const mjModel* m, mjData* d) {
     //   std::cout << " qpos0 inicial position joint 0 " << m->qpos0[0] << std::endl;
 }
 
-void SimController::Step(const mjModel* m, mjData* d) {
-    //   std::cout << " Desired position " << M_PI_2 << "\n";
-    //   std::cout << " Current position " << data->qpos[0] << "\n";
-    //   std::cout << " Delta " << (M_PI_2 + data->qpos[0]) << "\n";
-    //   std::cout << " i " << i << std::endl;
+void SimController::Step(const mjModel* m, mjData* data) {
+    std::cout << " Desired position " << M_PI_2 << "\n";
+    std::cout << " Current position " << data->qpos[0] << "\n";
+    std::cout << " Delta " << (M_PI_2 + data->qpos[0]) << "\n";
 
-    //   data->ctrl[0] = 0.3*(- M_PI_2 - data->qpos[0]);
+    data->ctrl[0] = 0.3*(- M_PI_2 - data->qpos[0]);
 }
 
 void SimController::PrintContactPoints(const mjData* d) {

@@ -12,6 +12,14 @@ elseif(UNIX)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib/our/linux)
 endif ()
 
+find_package(Threads)
+set(OpenGL_GL_PREFERENCE GLVND)
+find_package(OpenGL REQUIRED)
+if (UNIX)
+    find_package(glfw3 REQUIRED)
+    find_package(GLEW REQUIRED)
+endif ()
+
 include(ExternalProject)
 
 if (WIN32)
@@ -56,7 +64,7 @@ elseif (UNIX)
     ExternalProject_Add(
         external_mujoco
         PREFIX ${CMAKE_CURRENT_BINARY_DIR}/mujoco
-        URL "https://github.com/deepmind/mujoco/releases/download/2.1.4/mujoco-2.1.4-linux-x86_64.tar.gz"
+        URL "https://github.com/deepmind/mujoco/releases/download/2.1.3/mujoco-2.1.3-linux-x86_64.tar.gz"
         #URL_HASH SHA1=fe17a0610a239311a726ecabcd2dbd669fb24ca8
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
@@ -72,20 +80,11 @@ elseif (UNIX)
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/mujoco/src/external_mujoco/lib/* ${PROJECT_SOURCE_DIR}/external/mujoco/lib/
     )
 
-    # include_directories(${PROJECT_SOURCE_DIR}/external/mujoco/include)
-    add_library(mujocoExternalLib SHARED IMPORTED)
-    add_dependencies(mujocoExternalLib external_mujoco)
-    target_include_directories(mujocoExternalLib INTERFACE ${PROJECT_SOURCE_DIR}/external/mujoco/include)
-    set_target_properties(mujocoExternalLib PROPERTIES IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/external/mujoco/lib/libmujoco.so")
-
-endif ()
-
-find_package(Threads)
-set(OpenGL_GL_PREFERENCE GLVND)
-find_package(OpenGL REQUIRED)
-if (UNIX)
-    find_package(glfw3 REQUIRED)
-    find_package(GLEW REQUIRED)
+    add_library(mujoco SHARED IMPORTED)
+    add_dependencies(mujoco PUBLIC external_mujoco)
+    target_include_directories(mujoco INTERFACE ${PROJECT_SOURCE_DIR}/external/mujoco/include)
+    set_target_properties(mujoco PROPERTIES IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/external/mujoco/lib/libmujoco.so")
+    target_link_libraries(mujoco INTERFACE glfw ${GLEW_LIBRARIES} ${OPENGL_gl_LIBRARY})
 endif ()
 
 add_subdirectory(source)

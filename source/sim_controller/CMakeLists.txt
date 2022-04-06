@@ -1,9 +1,9 @@
 
 add_library(sim_controller STATIC source/sim_controller.cc)
 target_include_directories(sim_controller PRIVATE AFTER private_include include)
-target_link_libraries(sim_controller mujocoExternalLib)
+target_link_libraries(sim_controller mujoco)
 
 add_library(sim_controller_factory STATIC source/sim_controller_factory.cc)
 target_include_directories(sim_controller_factory INTERFACE include)
 target_include_directories(sim_controller_factory PRIVATE AFTER private_include include)
-target_link_libraries(sim_controller_factory mujocoExternalLib sim_controller)
+target_link_libraries(sim_controller_factory mujoco sim_controller)
