@@ -4,6 +4,8 @@
 #include <cstring>
 #include <iostream>
 
+#define PI_DIV_2     1.57079632679489661923
+
 void SimController::Init(const mjModel* m, mjData* d) {
     //   std::cout << "Joints : " << std::endl;
     //   for (int i = 0; i < m->nq ; ++i)
@@ -31,11 +33,11 @@ void SimController::Init(const mjModel* m, mjData* d) {
 }
 
 void SimController::Step(const mjModel* m, mjData* data) {
-    std::cout << " Desired position " << M_PI_2 << "\n";
+    std::cout << " Desired position " << PI_DIV_2 << "\n";
     std::cout << " Current position " << data->qpos[0] << "\n";
-    std::cout << " Delta " << (M_PI_2 + data->qpos[0]) << "\n";
+    std::cout << " Delta " << (PI_DIV_2 + data->qpos[0]) << "\n";
 
-    data->ctrl[0] = 0.3*(- M_PI_2 - data->qpos[0]);
+    data->ctrl[0] = 0.3*(- PI_DIV_2 - data->qpos[0]);
 }
 
 void SimController::PrintContactPoints(const mjData* d) {

@@ -33,8 +33,6 @@ void InvokeControllerStep(const mjModel* m, mjData* d) {
   controller->Step(m, d);
 }
 
-extern mjfGeneric mjcb_control;
-
 // keyboard callback
 void keyboard(GLFWwindow* window, int key, int scancode, int act, int mods) {
   // backspace: reset simulation
