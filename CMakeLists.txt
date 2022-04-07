@@ -72,8 +72,6 @@ if (WIN32)
     set_target_properties(mujoco PROPERTIES IMPORTED_IMPLIB "${PROJECT_SOURCE_DIR}/external/mujoco/lib/mujoco.lib")
     target_link_libraries(mujoco INTERFACE glfw3 ${GLEW_LIBRARIES} ${OPENGL_gl_LIBRARY})
 
-    #TODO copy mujoco.dll to bin\Debug
-    
 elseif (UNIX)
     ExternalProject_Add(
         external_mujoco
