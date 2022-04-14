@@ -5,6 +5,7 @@
 
 class ISimController {
     public:
+        virtual ~ISimController() {};
         virtual void Step(const mjModel* m, mjData* d) = 0;
         virtual void Init(const mjModel* m, mjData* d) = 0;
 };

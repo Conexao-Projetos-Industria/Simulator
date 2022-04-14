@@ -1,0 +1,2 @@
+add_executable(digital_twin_adapter source/digital_twin_adapter.cc)
+target_link_libraries(digital_twin_adapter ${CMAKE_THREAD_LIBS_INIT} position_info_channel_factory activity_manager_connector_factory)

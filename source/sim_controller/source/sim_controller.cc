@@ -6,7 +6,22 @@
 
 #define PI_DIV_2     1.57079632679489661923
 
+SimController::SimController()
+{
+    this->positionInterface = PositionInfoChannelFactory::Create("simulationPosition");
+    this->destinationPositions = std::unique_ptr<double[]>(new double[10]);
+}
+
+SimController::SimController(const std::string& sharedMemoryId)
+{
+    this->positionInterface = PositionInfoChannelFactory::Create(sharedMemoryId);
+    this->destinationPositions = std::unique_ptr<double[]>(new double[10]);
+}
+
 void SimController::Init(const mjModel* m, mjData* d) {
+    auto jointsQuantity = m->nq;
+    this->destinationPositions = std::unique_ptr<double[]>(new double[jointsQuantity]);
+    this->positionInterface->writeJointsQuantity(jointsQuantity);
     //   std::cout << "Joints : " << std::endl;
     //   for (int i = 0; i < m->nq ; ++i)
     //   {
@@ -33,11 +48,12 @@ void SimController::Init(const mjModel* m, mjData* d) {
 }
 
 void SimController::Step(const mjModel* m, mjData* data) {
-    std::cout << " Desired position " << PI_DIV_2 << "\n";
+    this->destinationPositions[0] = this->positionInterface->read(0);
+    std::cout << " Desired position " << this->destinationPositions[0] << "\n";
     std::cout << " Current position " << data->qpos[0] << "\n";
-    std::cout << " Delta " << (PI_DIV_2 + data->qpos[0]) << "\n";
+    std::cout << " Delta " << (this->destinationPositions[0] + data->qpos[0]) << "\n";
 
-    data->ctrl[0] = 0.3*(- PI_DIV_2 - data->qpos[0]);
+    data->ctrl[0] = 0.3*(- this->destinationPositions[0] - data->qpos[0]);
 }
 
 void SimController::PrintContactPoints(const mjData* d) {
