@@ -1,0 +1,4 @@
+add_library(WebsocketSession STATIC source/websocket_session.cc)
+target_include_directories(WebsocketSession INTERFACE include)
+target_include_directories(WebsocketSession PRIVATE AFTER include private_include)
+target_link_libraries(WebsocketSession ${BOOST_LIB} ServerHandler)
