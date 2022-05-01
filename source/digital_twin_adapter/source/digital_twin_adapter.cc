@@ -12,7 +12,7 @@ class DigitalTwinParser
     std::unique_ptr<IPositionInfoChannel> positionInfoChannel;
     public:
         DigitalTwinParser(const std::string& activityManagerURL, const std::string& robotId){
-            this->positionInfoChannel = PositionInfoChannelFactory::Create(robotId);
+            this->positionInfoChannel = PositionInfoChannelFactory::Create(robotId, ConnectionType::Master);
 
             auto parserCallback = std::bind(&DigitalTwinParser::Parse, this, std::placeholders::_1, std::placeholders::_2);
             this->activityManagerConnector = ActivityManagerConnectorFactory::Create(activityManagerURL, "resources/manifest.json", parserCallback);

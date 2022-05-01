@@ -8,13 +8,13 @@
 
 SimController::SimController()
 {
-    this->positionInterface = PositionInfoChannelFactory::Create("simulationPosition");
+    this->positionInterface = PositionInfoChannelFactory::Create("simulationPosition", ConnectionType::Slave);
     this->destinationPositions = std::unique_ptr<double[]>(new double[10]);
 }
 
 SimController::SimController(const std::string& sharedMemoryId)
 {
-    this->positionInterface = PositionInfoChannelFactory::Create(sharedMemoryId);
+    this->positionInterface = PositionInfoChannelFactory::Create(sharedMemoryId, ConnectionType::Slave);
     this->destinationPositions = std::unique_ptr<double[]>(new double[10]);
 }
 
