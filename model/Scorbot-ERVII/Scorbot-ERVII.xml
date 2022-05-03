@@ -1,0 +1,63 @@
+<mujoco model="pendulum">
+  <option timestep="0.005" iterations="50" solver="Newton" tolerance="1e-10"/>
+
+  <size njmax="50" nconmax="10" nstack="200"/>
+
+  <visual>
+    <rgba haze=".3 .3 .3 1"/>
+  </visual>
+
+  <!-- <default>
+    <joint type="hinge" pos="0 0 0" axis="0 1 0" limited="true" range="0 120" damping="0.1"/>
+    <muscle ctrllimited="true" ctrlrange="0 1"/> S
+  </default> -->
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.6 0.6 0.6" rgb2="0 0 0" width="512" height="512"/>
+
+    <texture name="texplane" type="2d" builtin="checker" rgb1=".25 .25 .25" rgb2=".3 .3 .3" width="512" height="512" mark="cross" markrgb=".8 .8 .8"/>
+
+    <material name="matplane" reflectance="0.3" texture="texplane" texrepeat="1 1" texuniform="true"/>
+
+    <mesh file="Base.stl"/>
+    <mesh file="Body.stl"/>
+    <mesh file="Shoulder.stl"/>
+    <mesh file="Arm.stl"/>
+    <mesh file="Wrist.stl"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" pos="0 0 -0.5" size="0 0 1" type="plane" material="matplane"/>
+
+    <light directional="true" diffuse=".8 .8 .8" specular=".2 .2 .2" pos="0 0 0" dir="0 0 -1"/>
+
+    <body pos="0 0 0">
+        <geom name="base" type="mesh" mesh="Base" pos="0 0 -0.5" euler="0 0 -90" contype="2"/>
+        <body pos="0 0 6.6">
+            <joint name="bodyJoint" type="hinge" pos="0 0 0" axis="0 0 1" damping="10"/>
+            <geom name="body" contype="2" type="mesh" mesh="Body" pos="0.04 0 -0.01" euler="0 0 -90" rgba=".5 .1 .8 1" mass="1" group="1"/>
+            <body pos="2.75 -4.54 7.55">
+                <joint name="shoulderJoint" type="hinge" pos="0 0 0" axis="0 1 0" damping="10"/>
+                <geom name="shoulder" type="mesh" mesh="Shoulder" pos="0 0 0" euler="0 0 -90" rgba=".5 0 .2 1" mass="1" group="1"/>
+                <body pos="11.02 1.52 0">
+                    <joint name="armJoint" type="hinge" pos="0 0 0" axis="0 1 0" damping="10"/>
+                    <geom name="arm" contype="2" type="mesh" mesh="Arm" pos="0 0 0" euler="0 0 -90" rgba=".5 .1 .8 1" mass="1" group="1"/>
+                    <body pos="9.05 2.37 0">
+                        <joint name="wristJoint" type="hinge" pos="0 0 0" axis="0 1 0" damping="10"/>
+                        <geom name="wrist" contype="2" type="mesh" mesh="Wrist" pos="0 0 0" euler="0 0 -90" rgba=".5 0 .2 1" mass="1" group="1"/>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </body>
+
+  </worldbody>
+
+  <actuator>
+    <motor name="Body" gear="1000"  joint="bodyJoint"/>
+    <motor name="Shoulder" gear="1000"  joint="shoulderJoint"/>
+    <motor name="Arm" gear="1000"  joint="armJoint"/>
+    <motor name="Wrist" gear="100"  joint="wristJoint"/>
+    <!-- <motor name="motor2" gear="1000000000"  joint="shoulder_i"/> -->
+  </actuator> 
+</mujoco>
