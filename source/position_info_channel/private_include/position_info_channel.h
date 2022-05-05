@@ -1,24 +1,34 @@
 #include "iposition_info_channel.h"
 
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
+#include <boost/interprocess/shared_memory_object.hpp>
+#include <boost/interprocess/mapped_region.hpp>
 
-struct ChannelStructure
+struct ChannelHeaderStructure
 {
     boost::interprocess::interprocess_mutex mutex;
 
-    int numberOfJoints;
-    double jointPosition[50];
+    uint16_t mNumberOfJoints;
 };
 
+struct ChannelBlockStructure
+{
+    double mPosition;
+};
 class PositionInfoChannel : public IPositionInfoChannel
 {
     ConnectionType mConnectionType;
     std::string mRobotName;
-    ChannelStructure* mData;
+    ChannelHeaderStructure* mHeader;
+    ChannelBlockStructure* mData;
+
+    boost::interprocess::shared_memory_object mSharedMemoryObject;
+    boost::interprocess::mapped_region mMappedRegion;
     public:
         PositionInfoChannel(std::string const& robotName, ConnectionType connectionType);
-        ~PositionInfoChannel(); //TODO use virtual destructor when implemented
-        virtual void writeJointsQuantity(int jointsQuantity);
-        virtual double read(int jointIndex);
-        virtual void write(int jointIndex, double value);
+        ~PositionInfoChannel();
+        virtual void writeJointsQuantity(uint16_t jointsQuantity);
+        virtual uint16_t readJointsQuantity();
+        virtual double read(uint16_t jointIndex);
+        virtual void write(uint16_t jointIndex, double value);
 };

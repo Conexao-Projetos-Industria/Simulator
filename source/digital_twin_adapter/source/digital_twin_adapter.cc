@@ -6,6 +6,8 @@
 #include <memory>
 #include <functional>
 
+#include <iostream>
+
 class DigitalTwinParser
 {
     std::unique_ptr<IActivityManagerConnector> activityManagerConnector;
@@ -36,5 +38,43 @@ class DigitalTwinParser
 
 int main()
 {
-    auto digitalTwinAdapter = DigitalTwinParser("192.168.0.1:9091", "RobotId");
+    // auto digitalTwinAdapter = DigitalTwinParser("192.168.0.1:9091", "RobotId");
+    auto positionInterface = PositionInfoChannelFactory::Create("simulationPosition", ConnectionType::Master);
+
+    std::cout << "Number of joints " << positionInterface->readJointsQuantity()<< std::endl;
+
+    std::cout << "l - list all joint desired positions" << std::endl;
+    std::cout << "w - write a position" << std::endl;
+    std::cout << "help - show help" << std::endl;
+    std::cout << "e - exit" << std::endl;
+
+    std::string userCommand = "";
+    while(userCommand != "e") {
+        std::cin >> userCommand;
+        if(userCommand == "l") {
+            for(uint16_t i = 0; i < positionInterface->readJointsQuantity(); ++i) {
+                std::cout << "At " << i << ": " << positionInterface->read(i) << std::endl;
+            }
+        }
+        else if(userCommand == "help") {
+            std::cout << "l - list all joint desired positions" << std::endl;
+            std::cout << "w - write a position" << std::endl;
+            std::cout << "help - show help" << std::endl;
+            std::cout << "e - exit" << std::endl;
+        }
+        else if(userCommand == "w") {
+            int16_t joint;
+            double position;
+            std::cout << "What joint?" << std::endl;
+            std::cin >> joint;
+            std::cout << "What position?" << std::endl;
+            std::cin >> position;
+
+            positionInterface->write(joint, position);
+        }
+        else {
+            std::cout << "Command not recognized" << std::endl;
+        }
+    }
+
 }

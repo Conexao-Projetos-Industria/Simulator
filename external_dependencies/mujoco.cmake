@@ -16,6 +16,7 @@ if (WIN32)
         COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/external/mujoco/lib/
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/external_mujoco-prefix/src/external_mujoco/lib/ ${PROJECT_SOURCE_DIR}/external/mujoco/lib/
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/external_mujoco-prefix/src/external_mujoco/bin/mujoco.dll ${PROJECT_SOURCE_DIR}/external/mujoco/lib/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/external_mujoco-prefix/src/external_mujoco/bin/mujoco.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mujoco.dll
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/external_mujoco-prefix/src/external_mujoco/bin/mujoco_nogl.dll ${PROJECT_SOURCE_DIR}/external/mujoco/lib/
     )
 

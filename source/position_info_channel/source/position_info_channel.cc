@@ -1,77 +1,93 @@
 #include "position_info_channel.h"
-#include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
-#include <boost/interprocess/mapped_region.hpp>
 
-using namespace boost::interprocess;
+namespace bi = boost::interprocess;
 
 PositionInfoChannel::PositionInfoChannel(std::string const& robotName, ConnectionType connectionType) {
     this->mConnectionType = connectionType;
     this->mRobotName = robotName;
 
     if(connectionType == ConnectionType::Slave){
-        shared_memory_object shm_obj (open_or_create               //open or create
-                                      ,this->mRobotName.c_str()    //name
-                                      ,read_only                    //read-only mode
-                                      );
+        this->mSharedMemoryObject = bi::shared_memory_object(bi::open_or_create
+                                                             ,this->mRobotName.c_str()
+                                                             ,bi::read_write
+                                                            );
 
-        shm_obj.truncate(10000);
+        this->mSharedMemoryObject.truncate(sizeof(ChannelHeaderStructure) + 50*sizeof(ChannelBlockStructure));
 
-        mapped_region region(shm_obj, read_write);
+        this->mMappedRegion = bi::mapped_region(this->mSharedMemoryObject, bi::read_write);
 
-        void* addr = region.get_address();
+        void* addr = mMappedRegion.get_address();
 
-        this->mData = new (addr) ChannelStructure;
+        this->mHeader = new (addr) ChannelHeaderStructure;
+
+        //Advance addr by size of ChannelStructure
+        this->mData = (ChannelBlockStructure*)( ((ChannelHeaderStructure*)this->mHeader) + 1);
 
         //TODO(giuliano) Should have other logic here. Not just allways write 50.
+        //The architectural correct solution would probrably be specialization of
+        //the PositionInfoChannel class to be created only after the robot is defined,
+        //and it be handle at the factory level. The objetc should be created only
+        //when suficient info is available, idealy no incomplete states.
+        //Same for truncate.
         this->writeJointsQuantity(50);
     }
     else if(connectionType == ConnectionType::Master){
-        shared_memory_object shm_obj (open_only                    //only open
-                                      ,this->mRobotName.c_str()    //name
-                                      ,read_write                   //read-write mode
-                                      );
+        this->mSharedMemoryObject = bi::shared_memory_object(bi::open_only
+                                                             ,this->mRobotName.c_str()
+                                                             ,bi::read_write
+                                                            );
 
-        mapped_region region(shm_obj, read_write);
+        this->mMappedRegion = bi::mapped_region(this->mSharedMemoryObject, bi::read_write);
 
-        this->mData = static_cast<ChannelStructure*>(region.get_address());
+        //Shared memory is created and initialized by the slave only.
+        this->mHeader = static_cast<ChannelHeaderStructure*>(this->mMappedRegion.get_address());
+
+        //Advance addr by size of ChannelStructure
+        this->mData = (ChannelBlockStructure*)( ((ChannelHeaderStructure*)this->mHeader) + 1);
     }
 }
 
 PositionInfoChannel::~PositionInfoChannel(){
     if(this->mConnectionType == ConnectionType::Slave){
         try{
-            shared_memory_object::remove(this->mRobotName.c_str());
+            bi::shared_memory_object::remove(this->mRobotName.c_str());
         }catch(...){}
     }
 }
 
-void PositionInfoChannel::writeJointsQuantity(int jointsQuantity) {
-    scoped_lock<interprocess_mutex> lock(this->mData->mutex);
+void PositionInfoChannel::writeJointsQuantity(uint16_t jointsQuantity) {
+    bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
 
     if(jointsQuantity > 50) {
         throw "Number of joints should be at maximum 50";
     }
 
-    this->mData->numberOfJoints = jointsQuantity;
+    this->mHeader->mNumberOfJoints = jointsQuantity;
 }
 
-double PositionInfoChannel::read(int jointIndex) {
-    scoped_lock<interprocess_mutex> lock(this->mData->mutex);
+uint16_t PositionInfoChannel::readJointsQuantity() {
+    bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
+    return this->mHeader->mNumberOfJoints;
+}
 
-    if(jointIndex >= this->mData->numberOfJoints){
+double PositionInfoChannel::read(uint16_t jointIndex) {
+    bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
+
+    if(jointIndex >= this->mHeader->mNumberOfJoints){
         throw "Specified joint index greater than number of joints";
     }
 
-    return this->mData->jointPosition[jointIndex];
+    return this->mData[jointIndex].mPosition;
+    return 0;
 }
 
-void PositionInfoChannel::write(int jointIndex, double value) {
-    scoped_lock<interprocess_mutex> lock(this->mData->mutex);
+void PositionInfoChannel::write(uint16_t jointIndex, double value) {
+    bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
 
-    if(jointIndex >= this->mData->numberOfJoints){
+    if(jointIndex >= this->mHeader->mNumberOfJoints){
         throw "Specified joint index greater than number of joints";
     }
 
-    this->mData->jointPosition[jointIndex] = value;
+    this->mData[jointIndex].mPosition = value;
 }

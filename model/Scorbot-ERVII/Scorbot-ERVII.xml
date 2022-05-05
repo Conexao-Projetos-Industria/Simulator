@@ -32,19 +32,19 @@
     <light directional="true" diffuse=".8 .8 .8" specular=".2 .2 .2" pos="0 0 0" dir="0 0 -1"/>
 
     <body pos="0 0 0">
-        <geom name="base" type="mesh" mesh="Base" pos="0 0 -0.5" euler="0 0 -90" contype="2"/>
+        <geom name="base" contype="2" conaffinity="57" type="mesh" mesh="Base" pos="0 0 -0.5" euler="0 0 -90" mass="0.0001" />
         <body pos="0 0 6.6">
-            <joint name="bodyJoint" type="hinge" pos="0 0 0" axis="0 0 1" damping="10"/>
-            <geom name="body" contype="2" type="mesh" mesh="Body" pos="0.04 0 -0.01" euler="0 0 -90" rgba=".5 .1 .8 1" mass="1" group="1"/>
+            <joint name="bodyJoint" type="hinge" pos="0 0 0" axis="0 0 1" damping="200"/>
+            <geom name="body" contype="4" conaffinity="49" type="mesh" mesh="Body" pos="0.04 0 -0.01" euler="0 0 -90" rgba=".5 .1 .8 1" mass="0.01" group="1"/>
             <body pos="2.75 -4.54 7.55">
-                <joint name="shoulderJoint" type="hinge" pos="0 0 0" axis="0 1 0" damping="10"/>
-                <geom name="shoulder" type="mesh" mesh="Shoulder" pos="0 0 0" euler="0 0 -90" rgba=".5 0 .2 1" mass="1" group="1"/>
+                <joint name="shoulderJoint" type="hinge" pos="0 0 0" axis="0 1 0" damping="200"/>
+                <geom name="shoulder" contype="8" conaffinity="35" type="mesh" mesh="Shoulder" pos="0 0 0" euler="0 0 -90" rgba=".5 0 .2 1" mass="0.01" group="1"/>
                 <body pos="11.02 1.52 0">
-                    <joint name="armJoint" type="hinge" pos="0 0 0" axis="0 1 0" damping="10"/>
-                    <geom name="arm" contype="2" type="mesh" mesh="Arm" pos="0 0 0" euler="0 0 -90" rgba=".5 .1 .8 1" mass="1" group="1"/>
+                    <joint name="armJoint" type="hinge" pos="0 0 0" axis="0 1 0" damping="100"/>
+                    <geom name="arm" contype="16" conaffinity="7" type="mesh" mesh="Arm" pos="0 0 0" euler="0 0 -90" rgba=".5 .1 .8 1" mass="0.01" group="1"/>
                     <body pos="9.05 2.37 0">
-                        <joint name="wristJoint" type="hinge" pos="0 0 0" axis="0 1 0" damping="10"/>
-                        <geom name="wrist" contype="2" type="mesh" mesh="Wrist" pos="0 0 0" euler="0 0 -90" rgba=".5 0 .2 1" mass="1" group="1"/>
+                        <joint name="wristJoint" type="hinge" pos="0 0 0" axis="0 1 0" damping="100"/>
+                        <geom name="wrist" contype="32" conaffinity="15" type="mesh" mesh="Wrist" pos="0 0 0" euler="0 0 -90" rgba=".5 0 .2 1" mass="0.01" group="1"/>
                     </body>
                 </body>
             </body>

@@ -1,15 +1,34 @@
+// Copyright 2021 DeepMind Technologies Limited
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 /*
- *  Adapted from Mujoco samples basic.cc
+ *  Adapted to use with controller
  */
 
 #include <cstdio>
 #include <cstring>
-#include <iostream>
 
 #include "GLFW/glfw3.h"
-#include "mujoco.h"
+#include <mujoco.h>
 
 #include "isim_controller.h"
+// sim_controller instace
+std::unique_ptr<ISimController> controller;
+
+void InvokeControllerStep(const mjModel* m, mjData* d) {
+  controller->Step(m, d);
+}
 
 // MuJoCo data structures
 mjModel* m = NULL;                  // MuJoCo model
@@ -26,12 +45,6 @@ bool button_right =  false;
 double lastx = 0;
 double lasty = 0;
 
-// sim_controller instace
-std::unique_ptr<ISimController> controller;
-
-void InvokeControllerStep(const mjModel* m, mjData* d) {
-  controller->Step(m, d);
-}
 
 // keyboard callback
 void keyboard(GLFWwindow* window, int key, int scancode, int act, int mods) {
@@ -41,6 +54,7 @@ void keyboard(GLFWwindow* window, int key, int scancode, int act, int mods) {
     mj_forward(m, d);
   }
 }
+
 
 // mouse button callback
 void mouse_button(GLFWwindow* window, int button, int act, int mods) {
@@ -52,6 +66,7 @@ void mouse_button(GLFWwindow* window, int button, int act, int mods) {
   // update mouse position
   glfwGetCursorPos(window, &lastx, &lasty);
 }
+
 
 // mouse move callback
 void mouse_move(GLFWwindow* window, double xpos, double ypos) {
@@ -88,11 +103,13 @@ void mouse_move(GLFWwindow* window, double xpos, double ypos) {
   mjv_moveCamera(m, action, dx/height, dy/height, &scn, &cam);
 }
 
+
 // scroll callback
 void scroll(GLFWwindow* window, double xoffset, double yoffset) {
   // emulate vertical mouse motion = 5% of window height
   mjv_moveCamera(m, mjMOUSE_ZOOM, 0, -0.05*yoffset, &scn, &cam);
 }
+
 
 // main function
 int main(int argc, const char** argv) {
@@ -133,6 +150,7 @@ int main(int argc, const char** argv) {
 
   // initialize visualization data structures
   mjv_defaultCamera(&cam);
+  mjv_moveCamera(m, mjMOUSE_ZOOM, 0, -13, &scn, &cam);
   mjv_defaultOption(&opt);
   mjv_defaultScene(&scn);
   mjr_defaultContext(&con);
@@ -155,7 +173,7 @@ int main(int argc, const char** argv) {
     //  Otherwise add a cpu timer and exit this loop when it is time to render.
     mjtNum simstart = d->time;
     while (d->time - simstart < 1.0/60.0) {
-        mj_step(m, d);
+      mj_step(m, d);
     }
 
     // get framebuffer viewport
@@ -181,7 +199,10 @@ int main(int argc, const char** argv) {
   mj_deleteData(d);
   mj_deleteModel(m);
 
+  // terminate GLFW (crashes with Linux NVidia drivers)
+#if defined(__APPLE__) || defined(_WIN32)
   glfwTerminate();
+#endif
 
   return 1;
 }

@@ -8,20 +8,45 @@
 
 SimController::SimController()
 {
-    this->positionInterface = PositionInfoChannelFactory::Create("simulationPosition", ConnectionType::Slave);
-    this->destinationPositions = std::unique_ptr<double[]>(new double[10]);
+    this->mPositionInterface = PositionInfoChannelFactory::Create("simulationPosition", ConnectionType::Slave);
+    this->BaseInit();
 }
 
 SimController::SimController(const std::string& sharedMemoryId)
 {
-    this->positionInterface = PositionInfoChannelFactory::Create(sharedMemoryId, ConnectionType::Slave);
-    this->destinationPositions = std::unique_ptr<double[]>(new double[10]);
+    this->mPositionInterface = PositionInfoChannelFactory::Create(sharedMemoryId, ConnectionType::Slave);
+    this->BaseInit();
+}
+
+void SimController::BaseInit() {
+    this->mDestinationPositions = std::unique_ptr<double[]>(new double[10]);
+    this->mWeigths = std::unique_ptr<JointControlWeigths[]>(new JointControlWeigths[10]);
 }
 
 void SimController::Init(const mjModel* m, mjData* d) {
-    auto jointsQuantity = m->nq;
-    this->destinationPositions = std::unique_ptr<double[]>(new double[jointsQuantity]);
-    this->positionInterface->writeJointsQuantity(jointsQuantity);
+    this->mPositionInterface->writeJointsQuantity(m->nq);
+    std::cout << "Number of joints " << this->mPositionInterface->readJointsQuantity()<< std::endl;
+    // for(uint16_t i = 0; i < this->positionInterface->readJointsQuantity(); ++i) {
+    //     this->positionInterface->write(i, PI_DIV_2);
+    // }
+    this->mPositionInterface->write(0, 10);
+    this->mWeigths[0].p = 0.4;
+
+    this->mPositionInterface->write(1, 0);
+    this->mWeigths[1].p = 2.5;
+
+    this->mPositionInterface->write(2, PI_DIV_2);
+    this->mWeigths[2].p = 1;
+
+    this->mPositionInterface->write(3, 0);
+    this->mWeigths[3].p = 1.5;
+
+    // this->mPositionInterface->write(4, 0);
+    // this->mWeigths[4].p = 0.6;
+
+    // auto jointsQuantity = m->nq;
+    // this->destinationPositions = std::unique_ptr<double[]>(new double[jointsQuantity]);
+    // this->positionInterface->writeJointsQuantity(jointsQuantity);
     //   std::cout << "Joints : " << std::endl;
     //   for (int i = 0; i < m->nq ; ++i)
     //   {
@@ -48,12 +73,16 @@ void SimController::Init(const mjModel* m, mjData* d) {
 }
 
 void SimController::Step(const mjModel* m, mjData* data) {
-    this->destinationPositions[0] = this->positionInterface->read(0);
-    std::cout << " Desired position " << this->destinationPositions[0] << "\n";
-    std::cout << " Current position " << data->qpos[0] << "\n";
-    std::cout << " Delta " << (this->destinationPositions[0] + data->qpos[0]) << "\n";
+    for(uint16_t i = 0; i < this->mPositionInterface->readJointsQuantity(); ++i) {
+        // this->destinationPositions[i] = this->positionInterface->read(i);
+        // std::cout << "Joint " << i << "\n";
+        // std::cout << "\tDesired position " << this->destinationPositions[i] << "\n";
+        // std::cout << "\tCurrent position " << data->qpos[i] << "\n";
+        // std::cout << "\tDelta " << (this->destinationPositions[i] + data->qpos[i]) << "\n";
 
-    data->ctrl[0] = 0.3*(- this->destinationPositions[0] - data->qpos[0]);
+        //Actual joint control.
+        data->ctrl[i] = this->mWeigths[i].p * (- this->mPositionInterface->read(i) - data->qpos[i]);
+    }
 }
 
 void SimController::PrintContactPoints(const mjData* d) {
