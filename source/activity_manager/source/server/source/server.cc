@@ -1,5 +1,5 @@
 #include "server.h"
-#include "http_session.h"
+#include "server_http_session.h"
 
 #include <iostream>
 
@@ -48,7 +48,7 @@ void Server::OnAccept(boost::beast::error_code errorCode) {
         return;
     }
 
-    auto newSession = std::make_shared<HttpSession>(std::move(this->mSocket), this->mState);
+    auto newSession = std::make_shared<ServerHttpSession>(std::move(this->mSocket), this->mState);
     newSession->Run();
 
     this->Run();

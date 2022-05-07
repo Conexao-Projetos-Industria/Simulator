@@ -1,14 +1,19 @@
+#pragma once
+
 #include "iactivity_manager_connector.h"
 
+class ClientWebsocketSession;
 class ActivityManagerConnector :public IActivityManagerConnector{
         std::string mTopic;
         std::string mToken;
 
-        void AquireToken(const std::string& activityManagerURL);
+        std::shared_ptr<ClientWebsocketSession> mWebsocket;
+
+        void AquireToken(std::string const& activityManagerURL);
     public:
-        ActivityManagerConnector(const std::string& activityManagerURL,
-                                 const std::string& manifestPath,
-                                 std::function<void(const std::string&, const std::string&)> parserCallback);
-        // virtual ~IActivityManagerConnector() = 0; //TODO use virtual destructor when implemented
-        virtual void Publish(const std::string& content, const std::string& key);
+        ActivityManagerConnector(std::string const& activityManagerURL,
+                                 std::string const& manifestPath,
+                                 std::function<void(const std::string&, const std::string&)> parserCallback,
+                                 std::string const& messageOnConnect = "");
+        virtual void Publish(std::string const& content, std::string const& key);
 };

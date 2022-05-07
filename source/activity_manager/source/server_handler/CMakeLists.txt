@@ -1,4 +1,4 @@
 add_library(ServerHandler STATIC source/server_handler.cc)
 target_include_directories(ServerHandler INTERFACE include)
 target_include_directories(ServerHandler PRIVATE AFTER include private_include)
-target_link_libraries(ServerHandler ${BOOST_LIB} WebsocketSession)
+target_link_libraries(ServerHandler ${BOOST_LIB} ServerWebsocketSession)

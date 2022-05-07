@@ -12,6 +12,7 @@ int main(int argc, char* argv[])
     unsigned short port;
 
     if (argc != 3) {
+        std::cout << "You can pass server ip and port as arguments.\n Example:\n .\\activity_manager.exe \"192.168.0.17\" \"9091\"";
         std::cout << "What is the address the Activity Manager is hosted on? (ex.: 0.0.0.0)\n";
         std::string userAddress;
         std::cin >> userAddress;

@@ -4,21 +4,24 @@
 #include <string>
 #include <unordered_set>
 #include <mutex>
+#include <iostream>
 
 namespace http = boost::beast::http;
 
-class WebsocktSession;
+class ServerWebsocktSession;
 class ServerHandler {
     private:
         std::mutex mSessionsMutex;
-        std::unordered_set<WebsocktSession*> mSessions;
+        std::unordered_set<ServerWebsocktSession*> mAllSessions;
+        std::unordered_multimap<std::string, ServerWebsocktSession*> mTopicsMap;
+        int mDebugInt = 0;
 
     public:
         ServerHandler();
-        template<class Body, class Allocator, class Send>
-        void HandleHttpRequest (http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {};
-        void HandleWebsocketMessage (WebsocktSession* session, std::string message) {};
-        void Add (WebsocktSession* session) {};
-        void Leave (WebsocktSession* session) {};
-        void Broadcast (std::string message) {};
+
+        void HandleHttpRequest (http::request<http::string_body>&& req , std::function<void(http::response<http::string_body>)>&& sendCallback);
+        void HandleWebsocketMessage (ServerWebsocktSession* session, std::string const& message);
+        void Add (ServerWebsocktSession* session);
+        void Leave (ServerWebsocktSession* session);
+        void Broadcast (std::string message);
 };

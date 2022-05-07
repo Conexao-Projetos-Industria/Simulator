@@ -1,0 +1,2 @@
+add_executable(serial_adapter source/serial_adapter.cc)
+target_link_libraries(serial_adapter ${CMAKE_THREAD_LIBS_INIT} position_info_channel_factory activity_manager_connector_factory)
