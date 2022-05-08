@@ -57,7 +57,7 @@ PositionInfoChannel::~PositionInfoChannel(){
 }
 
 void PositionInfoChannel::writeJointsQuantity(uint16_t jointsQuantity) {
-    bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
+    // bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
 
     if(jointsQuantity > 50) {
         throw "Number of joints should be at maximum 50";
@@ -67,12 +67,12 @@ void PositionInfoChannel::writeJointsQuantity(uint16_t jointsQuantity) {
 }
 
 uint16_t PositionInfoChannel::readJointsQuantity() {
-    bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
+    // bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
     return this->mHeader->mNumberOfJoints;
 }
 
 double PositionInfoChannel::read(uint16_t jointIndex) {
-    bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
+    // bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
 
     if(jointIndex >= this->mHeader->mNumberOfJoints){
         throw "Specified joint index greater than number of joints";
@@ -83,7 +83,7 @@ double PositionInfoChannel::read(uint16_t jointIndex) {
 }
 
 void PositionInfoChannel::write(uint16_t jointIndex, double value) {
-    bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
+    // bi::scoped_lock<bi::interprocess_mutex> lock(this->mHeader->mutex);
 
     if(jointIndex >= this->mHeader->mNumberOfJoints){
         throw "Specified joint index greater than number of joints";

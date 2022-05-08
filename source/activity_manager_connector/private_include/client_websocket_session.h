@@ -23,7 +23,7 @@ class ClientWebsocketSession : public std::enable_shared_from_this<ClientWebsock
     public:
         explicit ClientWebsocketSession(boost::asio::io_context& ioContext
                                         ,std::function<void(std::string const&, std::string const&)> parserCallback);
-        ClientWebsocketSession::~ClientWebsocketSession();
+        ~ClientWebsocketSession();
         void Run(std::string const& url, std::string const& query = "");
         void Send(std::string const& message, std::string const& key);
         void Close();

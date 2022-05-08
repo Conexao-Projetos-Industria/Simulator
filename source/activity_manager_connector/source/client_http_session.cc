@@ -14,7 +14,7 @@ std::string ClientHttpSession::Get(std::string const& url, std::string const&& q
         httpResponse = returnedString;
     });
 
-    httpSession->GetUrl("192.168.0.17:9091", std::move(queryText));
+    httpSession->GetUrl(url, std::move(queryText));
 
     ioContext.run();
 

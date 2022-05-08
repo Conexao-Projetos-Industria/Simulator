@@ -10,20 +10,20 @@
 
 class SerialAdapter
 {
-    std::unique_ptr<IActivityManagerConnector> activityManagerConnector;
+    std::unique_ptr<IActivityManagerConnector> mActivityManagerConnector;
     public:
         SerialAdapter(const std::string& activityManagerURL, const std::string& robotId){
             // this->positionInfoChannel = PositionInfoChannelFactory::Create(robotId, ConnectionType::Master);
 
             auto parserCallback = std::bind(&SerialAdapter::Parse, this, std::placeholders::_1, std::placeholders::_2);
-            this->activityManagerConnector = ActivityManagerConnectorFactory::Create(activityManagerURL, "resources/manifest.json", parserCallback, "MensagemAoConnectar");
+            this->mActivityManagerConnector = ActivityManagerConnectorFactory::Create(activityManagerURL, "resources/manifest.json", parserCallback, "MensagemAoConnectar");
         };
 
         void PublishPosition(uint16_t joint, double position){
             std::cout << "[SerialAdapter]PublishPosition" << std::endl;
             std::stringstream ss;
-            ss << joint << position;
-            this->activityManagerConnector->Publish(ss.str(), "positionUpdate");
+            ss << joint << " "  << position;
+            this->mActivityManagerConnector->Publish(ss.str(), "positionUpdate");
         };
     private:
         void Parse(const std::string& received, const std::string& key){\
@@ -36,7 +36,7 @@ class SerialAdapter
 
 int main()
 {
-    auto serialAdapter = SerialAdapter("192.168.0.17:9091", "RobotId");
+    auto serialAdapter = SerialAdapter("192.168.0.8:9091", "RobotId");
 
     // std::cout << "l - list all joint desired positions" << std::endl;
     std::cout << "w - write a position" << std::endl;

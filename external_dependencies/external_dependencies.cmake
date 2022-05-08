@@ -15,8 +15,11 @@ if(USING_CONAN)
     set(GLFW3_LIB glfw)
 
     find_package(Boost)
-    set(BOOST_LIB Boost::boost)
-
+    if (WIN32)
+        set(BOOST_LIB Boost::boost)
+    elseif (UNIX)
+        set(BOOST_LIB Boost::boost rt)
+    endif ()
 else()
 
     include(external_dependencies/glew.cmake)

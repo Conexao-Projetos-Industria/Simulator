@@ -10,18 +10,18 @@
 
 class DigitalTwinParser
 {
-    std::unique_ptr<IActivityManagerConnector> activityManagerConnector;
-    std::unique_ptr<IPositionInfoChannel> positionInfoChannel;
+    std::unique_ptr<IActivityManagerConnector> mActivityManagerConnector;
+    std::unique_ptr<IPositionInfoChannel> mPositionInfoChannel;
     public:
         DigitalTwinParser(const std::string& activityManagerURL, const std::string& robotId){
-            // this->positionInfoChannel = PositionInfoChannelFactory::Create(robotId, ConnectionType::Master);
+            this->mPositionInfoChannel = PositionInfoChannelFactory::Create("simulationPosition", ConnectionType::Master);
 
             auto parserCallback = std::bind(&DigitalTwinParser::Parse, this, std::placeholders::_1, std::placeholders::_2);
-            this->activityManagerConnector = ActivityManagerConnectorFactory::Create(activityManagerURL, "resources/manifest.json", parserCallback, "MensagemAoConnectar");
+            this->mActivityManagerConnector = ActivityManagerConnectorFactory::Create(activityManagerURL, "resources/manifest.json", parserCallback, "MensagemAoConnectar");
         };
 
     private:
-        void Parse(const std::string& key, const std::string& message){\
+        void Parse(const std::string& message, const std::string& key){\
             std::cout << "[Digital Twin] message:" << message << "  key: " << key <<std::endl;
             if(key == "positionUpdate"){
                 uint16_t joint;
@@ -38,13 +38,15 @@ class DigitalTwinParser
             // double position = 0.0;
 
             // std::stringstream (received) >> jointNumber >> position;
-            positionInfoChannel->write(joint, position);
+            this->mPositionInfoChannel->write(joint, position);
         };
 };
 
 int main()
 {
-    auto digitalTwinAdapter = DigitalTwinParser("192.168.0.17:9091", "RobotId");
+    auto digitalTwinAdapter = DigitalTwinParser("192.168.0.8:9091", "RobotId");
+
+    while(true){;}
     // auto positionInterface = PositionInfoChannelFactory::Create("simulationPosition", ConnectionType::Master);
 
     // std::cout << "Number of joints " << positionInterface->readJointsQuantity()<< std::endl;

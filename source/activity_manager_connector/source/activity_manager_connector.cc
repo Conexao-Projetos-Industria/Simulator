@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <thread>
 
 ActivityManagerConnector::ActivityManagerConnector(const std::string& activityManagerURL,
                                                    const std::string& manifestPath,
@@ -24,12 +25,19 @@ ActivityManagerConnector::ActivityManagerConnector(const std::string& activityMa
 
     this->mWebsocket->Run(activityManagerURL, messageOnConnect);
 
-    contextPtr->run();
+    auto thread = std::thread([contextPtr](){
+        contextPtr->run();
+        std::cout << "End thread" << std::endl;
+    });
+    
+    thread.detach();
+
+    // contextPtr->run();
 }
 
 //Connect with activivty manager and get a token. (In the future it will be used for security)
 void ActivityManagerConnector::AquireToken(std::string const& activityManagerURL) {
-    std::cout << "[ActivityManagerConnector] Read on connection: " << ClientHttpSession::Get("192.168.0.17:9091", "[ActivityManagerConnector]Token");
+    std::cout << "[ActivityManagerConnector] Read on connection: " << ClientHttpSession::Get(activityManagerURL, "[ActivityManagerConnector]Token");
 }
 
 void ActivityManagerConnector::Publish(std::string const& content, std::string const& key) {

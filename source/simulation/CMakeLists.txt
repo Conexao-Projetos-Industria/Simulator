@@ -7,5 +7,5 @@ if (WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/external/mujoco/lib/mujoco.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mujoco.dll
     )
 elseif (UNIX)
-    target_link_libraries(simulator mujoco ${CMAKE_THREAD_LIBS_INIT} sim_controller_factory )
+    target_link_libraries(simulator mujoco ${CMAKE_THREAD_LIBS_INIT} sim_controller_factory librt.so)
 endif ()
