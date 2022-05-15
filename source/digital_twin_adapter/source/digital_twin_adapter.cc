@@ -42,47 +42,18 @@ class DigitalTwinParser
         };
 };
 
-int main()
+int main(int argc, char* argv[])
 {
-    auto digitalTwinAdapter = DigitalTwinParser("192.168.0.8:9091", "RobotId");
+    std::string address;
+    if (argc != 2) {
+        std::cout << "You can pass the Activity Manager URL as argument.\n Example:\n .\\digital_twin_adapter.exe \"192.168.0.17:9091\"";
+        std::cout << "\nWhat is the URL the Activity Manager is hosted on? (ex.: 192.168.0.17:9091)\n";
+        std::cin >> address;
+    } else {
+        address = std::string(argv[1]);
+    }
+
+    auto digitalTwinAdapter = DigitalTwinParser(address, "RobotId");
 
     while(true){;}
-    // auto positionInterface = PositionInfoChannelFactory::Create("simulationPosition", ConnectionType::Master);
-
-    // std::cout << "Number of joints " << positionInterface->readJointsQuantity()<< std::endl;
-
-    // std::cout << "l - list all joint desired positions" << std::endl;
-    // std::cout << "w - write a position" << std::endl;
-    // std::cout << "help - show help" << std::endl;
-    // std::cout << "e - exit" << std::endl;
-
-    // std::string userCommand = "";
-    // while(userCommand != "e") {
-    //     std::cin >> userCommand;
-    //     if(userCommand == "l") {
-    //         for(uint16_t i = 0; i < positionInterface->readJointsQuantity(); ++i) {
-    //             std::cout << "At " << i << ": " << positionInterface->read(i) << std::endl;
-    //         }
-    //     }
-    //     else if(userCommand == "help") {
-    //         std::cout << "l - list all joint desired positions" << std::endl;
-    //         std::cout << "w - write a position" << std::endl;
-    //         std::cout << "help - show help" << std::endl;
-    //         std::cout << "e - exit" << std::endl;
-    //     }
-    //     else if(userCommand == "w") {
-    //         int16_t joint;
-    //         double position;
-    //         std::cout << "What joint?" << std::endl;
-    //         std::cin >> joint;
-    //         std::cout << "What position?" << std::endl;
-    //         std::cin >> position;
-
-    //         positionInterface->write(joint, position);
-    //     }
-    //     else {
-    //         std::cout << "Command not recognized" << std::endl;
-    //     }
-    // }
-
 }

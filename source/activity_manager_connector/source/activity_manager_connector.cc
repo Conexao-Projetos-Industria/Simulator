@@ -27,7 +27,6 @@ ActivityManagerConnector::ActivityManagerConnector(const std::string& activityMa
 
     auto thread = std::thread([contextPtr](){
         contextPtr->run();
-        std::cout << "End thread" << std::endl;
     });
     
     thread.detach();

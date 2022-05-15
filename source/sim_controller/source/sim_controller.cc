@@ -20,7 +20,7 @@ SimController::SimController(const std::string& sharedMemoryId)
 
 void SimController::BaseInit() {
     this->mDestinationPositions = std::unique_ptr<double[]>(new double[10]);
-    this->mWeigths = std::unique_ptr<JointControlWeigths[]>(new JointControlWeigths[10]);
+    this->mJointParameters = std::unique_ptr<JointControlParameters[]>(new JointControlParameters[10]);
 }
 
 void SimController::Init(const mjModel* m, mjData* d) {
@@ -30,16 +30,16 @@ void SimController::Init(const mjModel* m, mjData* d) {
     //     this->positionInterface->write(i, PI_DIV_2);
     // }
     this->mPositionInterface->write(0, 10);
-    this->mWeigths[0].p = 0.4;
+    this->mJointParameters[0].p = 0.4;
 
     this->mPositionInterface->write(1, 0);
-    this->mWeigths[1].p = 2.5;
+    this->mJointParameters[1].p = 2.5;
 
     this->mPositionInterface->write(2, PI_DIV_2);
-    this->mWeigths[2].p = 1;
+    this->mJointParameters[2].p = 1;
 
     this->mPositionInterface->write(3, 0);
-    this->mWeigths[3].p = 1.5;
+    this->mJointParameters[3].p = 1.5;
 
     // this->mPositionInterface->write(4, 0);
     // this->mWeigths[4].p = 0.6;
@@ -81,7 +81,7 @@ void SimController::Step(const mjModel* m, mjData* data) {
         // std::cout << "\tDelta " << (this->destinationPositions[i] + data->qpos[i]) << "\n";
 
         //Actual joint control.
-        data->ctrl[i] = this->mWeigths[i].p * (- this->mPositionInterface->read(i) - data->qpos[i]);
+        data->ctrl[i] = this->mJointParameters[i].p * (- this->mPositionInterface->read(i) - data->qpos[i]);
     }
 }
 

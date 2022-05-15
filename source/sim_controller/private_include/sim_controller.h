@@ -5,7 +5,7 @@
 #include <string>
 #include <memory>
 
-struct JointControlWeigths {
+struct JointControlParameters {
     uint16_t p;
 };
 class SimController : public ISimController {
@@ -18,7 +18,7 @@ class SimController : public ISimController {
     private:
         std::unique_ptr<double[]> mDestinationPositions;
         std::unique_ptr<IPositionInfoChannel> mPositionInterface;
-        std::unique_ptr<JointControlWeigths[]> mWeigths;
+        std::unique_ptr<JointControlParameters[]> mJointParameters;
         void BaseInit();
         void PrintContactPoints(const mjData* d);
 };

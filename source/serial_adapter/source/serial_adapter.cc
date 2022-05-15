@@ -34,9 +34,18 @@ class SerialAdapter
         };
 };
 
-int main()
+int main(int argc, char* argv[])
 {
-    auto serialAdapter = SerialAdapter("192.168.0.8:9091", "RobotId");
+    std::string address;
+    if (argc != 2) {
+        std::cout << "You can pass the Activity Manager URL as argument.\n Example:\n .\\digital_twin_adapter.exe \"192.168.0.17:9091\"";
+        std::cout << "\nWhat is the URL the Activity Manager is hosted on? (ex.: 192.168.0.17:9091)\n";
+        std::cin >> address;
+    } else {
+        address = std::string(argv[1]);
+    }
+
+    auto serialAdapter = SerialAdapter(address, "RobotId");
 
     // std::cout << "l - list all joint desired positions" << std::endl;
     std::cout << "w - write a position" << std::endl;
