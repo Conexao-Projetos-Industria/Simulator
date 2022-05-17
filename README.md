@@ -27,12 +27,5 @@ cmake .. -G "Visual Studio 17 2022"
 cmake --build .
 ```
 
-## Commands to run on linux:
-
-./bin/sim_base model/pendulum/pendulum.xml
-
-## Commands to run on windows:
-
-```
-bin\Debug\sim_base.exe model\pendulum\pendulum.xml
-```
+## To run:
+In order to run the application, read the first section of the docs
