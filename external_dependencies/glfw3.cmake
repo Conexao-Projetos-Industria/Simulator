@@ -1,20 +1,14 @@
-if (WIN32)
+include(FetchContent)
 
-    ExternalProject_Add(
-        external_glfw3
-        URL "https://github.com/glfw/glfw/archive/3.1.tar.gz"
-        URL_HASH SHA1=fe17a0610a239311a726ecabcd2dbd669fb24ca8
-        CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${PROJECT_SOURCE_DIR}/external/glfw3"
-    )
-    include_directories(${PROJECT_SOURCE_DIR}/external/glfw3/include)
-    add_library(glfw3 STATIC IMPORTED)
-    set_property(TARGET glfw3 PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/external/glfw3/lib/glfw3.lib)
-    add_dependencies(glfw3 external_glfw3)
+FetchContent_Declare(
+    glfw3
+    GIT_REPOSITORY https://github.com/glfw/glfw.git
+    GIT_TAG 3.3.7
+)
 
-elseif(UNIX)
+set(GLFW_BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_TESTS OFF)
+set(GLFW_BUILD_DOCS OFF)
+set(GLFW_INSTALL OFF)
 
-    # find_package(glfw3 REQUIRED)
-    
-endif ()
-
-set(GLFW3_LIB glfw3)
+FetchContent_MakeAvailable(glfw3)

@@ -2,6 +2,7 @@ include(FetchContent)
 
 FetchContent_Declare(
     mujoco
+    # change to https://github.com/deepmind/mujoco.git only when PR #311 is merged
     GIT_REPOSITORY https://github.com/lucas-inacio/mujoco.git
     GIT_TAG main
 )

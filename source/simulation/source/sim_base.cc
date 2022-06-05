@@ -19,7 +19,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 #include <mujoco/mujoco.h>
 
 #include "isim_controller.h"

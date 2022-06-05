@@ -1,6 +1,6 @@
 add_executable(simulator source/sim_base.cc)
 if (WIN32)
-    target_link_libraries(simulator mujoco ${CMAKE_THREAD_LIBS_INIT} ${GLFW3_LIB} sim_controller_factory)
+    target_link_libraries(simulator mujoco ${CMAKE_THREAD_LIBS_INIT} glfw sim_controller_factory)
 elseif (UNIX)
     target_link_libraries(simulator mujoco ${CMAKE_THREAD_LIBS_INIT} sim_controller_factory librt.so)
 endif ()
