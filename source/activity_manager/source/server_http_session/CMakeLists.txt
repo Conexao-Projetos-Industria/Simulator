@@ -1,4 +1,4 @@
 add_library(ServerHttpSession STATIC source/server_http_session.cc)
 target_include_directories(ServerHttpSession INTERFACE include)
 target_include_directories(ServerHttpSession PRIVATE AFTER include private_include)
-target_link_libraries(ServerHttpSession ${BOOST_LIB} ServerHandler ServerWebsocketSession)
+target_link_libraries(ServerHttpSession boost_beast ServerHandler ServerWebsocketSession)

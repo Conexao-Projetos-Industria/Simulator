@@ -2,7 +2,7 @@
 add_library(position_info_channel STATIC source/position_info_channel.cc)
 target_include_directories(position_info_channel INTERFACE include)
 target_include_directories(position_info_channel PRIVATE AFTER include private_include)
-target_link_libraries(position_info_channel ${BOOST_LIB})
+target_link_libraries(position_info_channel boost_interprocess)
 
 add_library(position_info_channel_factory STATIC source/position_info_channel_factory.cc)
 target_include_directories(position_info_channel_factory INTERFACE include)
