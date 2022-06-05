@@ -8,12 +8,6 @@ if(USING_CONAN)
 
     include(external_dependencies/run_conan.cmake)
 
-    find_package(GLEW)
-    set(GLEW_LIB GLEW::GLEW)
-
-    # find_package(glfw3)
-    # set(GLFW3_LIB glfw)
-
     find_package(Boost)
     if (WIN32)
         set(BOOST_LIB Boost::boost)
@@ -21,11 +15,7 @@ if(USING_CONAN)
         set(BOOST_LIB Boost::boost rt)
     endif ()
 else()
-
-    include(external_dependencies/glew.cmake)
-    include(external_dependencies/glfw3.cmake)
     include(external_dependencies/boost.cmake)
-
 endif()
 
 if(WIN32)
