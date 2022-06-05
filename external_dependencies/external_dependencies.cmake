@@ -2,11 +2,8 @@ find_package(Threads)
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 
-if(USING_CONAN)
-    include(external_dependencies/run_conan.cmake)
-endif()
-    
 if(WIN32)
+    include(external_dependencies/run_conan.cmake)
     include(external_dependencies/glfw3.cmake)
 endif()
     

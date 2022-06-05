@@ -14,8 +14,6 @@ else()
 endif()
 add_compile_definitions(_WIN32_WINNT=0x0601)
 
-set(USING_CONAN TRUE)
-
 # Settinge variables before including subprojects so dependencies using FetchContent will be affected
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
