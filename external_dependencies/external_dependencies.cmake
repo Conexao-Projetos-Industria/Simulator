@@ -2,8 +2,6 @@ find_package(Threads)
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 
-include(ExternalProject)
-
 if(USING_CONAN)
     include(external_dependencies/run_conan.cmake)
 endif()
