@@ -20,7 +20,7 @@
 #include <cstring>
 
 #include "GLFW/glfw3.h"
-#include <mujoco.h>
+#include <mujoco/mujoco.h>
 
 #include "isim_controller.h"
 // sim_controller instace
