@@ -10,7 +10,7 @@ endif()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
 conan_cmake_run(CONANFILE conanfile.txt  # or relative build/conanfile.txt
-                BASIC_SETUP CMAKE_TARGETS
+                BASIC_SETUP CMAKE_TARGETS NO_OUTPUT_DIRS
                 BUILD missing)
 
 conan_cmake_autodetect(settings)
